@@ -35,18 +35,18 @@ void substr(char *dest, char *src, int start, int length)
 void crack_pass(char *salt_and_encrypted)
 {
 
-  int p, x, y, z;     // Loop counters
+  int s, a, k, t;     // Loop counters
   char salt[7];    // String used in hashing the password. Need space for \0 
   char plain[7];   // The combination of letters currently being checked 
   char *enc;       // Pointer to the encrypted password
 
   substr(salt, salt_and_encrypted, 0, 6);
 
-  for(p='A'; p<='Z'; p++)
-   for(x='A'; x<='Z'; x++){
-     for(y='A'; y<='Z'; y++){
-       for(z=0; z<=99; z++){
-         sprintf(plain, "%c%c%c%02d", p, x, y, z); 
+  for(s='A'; s<='Z'; s++)
+   for(a='A'; a<='Z'; a++){
+     for(k='A'; k<='Z'; k++){
+       for(t=0; t<=99; t++){
+         sprintf(plain, "%c%c%c%02d", s, a, k, t); 
          enc = (char *) crypt(plain, salt);
          count++;
          if(strcmp(salt_and_encrypted, enc) == 0){
@@ -92,4 +92,3 @@ int main(int argc,char *argv[])
   return 0;
   
 }
-

@@ -7,13 +7,13 @@
   Sakshyat Sharma, 2036886
   
   Task3_A:
-  Image Blurrring with Gaussian Filtering
+  Image Blurrring with Gaussian Filtering using CUDA
 
   Compile with:
     nvcc 2036886_Task3_B.cu lodepng.cpp
   
   Run with:
-    ././a.out hck.png
+    ./a.out hck_image.png
 
 ******************************************************************************/
 
@@ -141,13 +141,35 @@ __global__ void changeImage(unsigned char* image, unsigned char* newImage, unsig
   setBlue(newImage, row, col, newBlue);
 }
 
+int time_difference(struct timespec *start, struct timespec *finish,long long int *difference) 
+{
+
+  long long int ds =  finish->tv_sec - start->tv_sec; 
+  long long int dn =  finish->tv_nsec - start->tv_nsec; 
+
+  if(dn < 0 ) {
+    ds--;
+    dn += 1000000000; 
+  } 
+  
+  *difference = ds * 1000000000 + dn;
+  
+  return !(*difference > 0);
+  
+}
+
 int main(int argc, char **argv)
 {
+  struct timespec start, finish;
+  long long int time_elapsed;
+  
   unsigned char *image;
   const char *filename = argv[1];
-  const char *newFileName = "filtered.png";
+  const char *newFileName = "blurred_image.png";
   unsigned char *newImage;
   unsigned int height = 0, width = 0;
+  
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   lodepng_decode32_file(&image, &width, &height, filename);
   newImage = (unsigned char *)malloc(height * width * 4 * sizeof(unsigned char));
@@ -162,7 +184,12 @@ int main(int argc, char **argv)
   unsigned int* gpuWidth; 
   cudaMalloc( (void**) &gpuWidth, sizeof(int));
   cudaMemcpy(gpuWidth, &width, sizeof(int), cudaMemcpyHostToDevice);
+  
 
+  clock_gettime(CLOCK_MONOTONIC, &finish);
+  time_difference(&start, &finish, &time_elapsed);
+  
+  printf("Time elapsed was %lldns or %0.9lfs\n", time_elapsed, (time_elapsed/1.0e9)); 
   printf("Image width = %d height = %d\n", width, height);
 
   changeImage<<<height-1,width-1>>>(gpuImage, gpuNewImage, gpuWidth);
